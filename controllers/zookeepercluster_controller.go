@@ -61,16 +61,19 @@ type reconcileFun func(cluster *zookeeperv1beta1.ZookeeperCluster) error
 
 // +kubebuilder:rbac:groups=zookeeper.pravega.io.zookeeper.pravega.io,resources=zookeeperclusters,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=zookeeper.pravega.io.zookeeper.pravega.io,resources=zookeeperclusters/status,verbs=get;update;patch
-
-func (r *ZookeeperClusterReconciler) Reconcile(_ context.Context, request ctrl.Request) (ctrl.Result, error) {
+func (r *ZookeeperClusterReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	r.Log = log.WithValues(
+		"app", "SLEEVELESS",
+		"operation", "reconcile",
 		"Request.Namespace", request.Namespace,
 		"Request.Name", request.Name)
 	r.Log.Info("Reconciling ZookeeperCluster")
 
+	traceCtx, err := otel.StartSpan(ctx, "Reconcile")
+
 	// Fetch the ZookeeperCluster instance
 	instance := &zookeeperv1beta1.ZookeeperCluster{}
-	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Client.Get(traceCtx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile
@@ -157,7 +160,7 @@ func compareResourceVersion(zk *zookeeperv1beta1.ZookeeperCluster, sts *appsv1.S
 	return 0
 }
 
-func (r *ZookeeperClusterReconciler) reconcileStatefulSet(instance *zookeeperv1beta1.ZookeeperCluster) (err error) {
+func (r *ZookeeperClusterReconciler) reconcileStatefulSet(context context.COntext, instance *zookeeperv1beta1.ZookeeperCluster) (err error) {
 
 	// we cannot upgrade if cluster is in UpgradeFailed
 	if instance.Status.IsClusterInUpgradeFailedState() {
@@ -215,6 +218,7 @@ func (r *ZookeeperClusterReconciler) reconcileStatefulSet(instance *zookeeperv1b
 			}
 		}
 	}
+	otel.StartSpan(context.Background(), "reconcileStatefulSet")
 	sts := zk.MakeStatefulSet(instance)
 	if err = controllerutil.SetControllerReference(instance, sts, r.Scheme); err != nil {
 		return err
@@ -230,7 +234,8 @@ func (r *ZookeeperClusterReconciler) reconcileStatefulSet(instance *zookeeperv1b
 			"StatefulSet.Name", sts.Name)
 		// label the RV of the zookeeperCluster when creating the sts
 		sts.Labels["owner-rv"] = instance.ResourceVersion
-		err = r.Client.Create(context.TODO(), sts)
+		sts.Labels["trace-ui"] = traceCtx.ID().String()
+		err = r.Client.Create(traceCtx, sts)
 		if err != nil {
 			return err
 		}
