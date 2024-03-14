@@ -1,0 +1,3 @@
+[submodule "custom/client-go"]
+	path = custom/client-go
+	url = https://github.com/tgoodwin/client-go

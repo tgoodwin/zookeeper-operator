@@ -10,7 +10,7 @@ require (
 	github.com/operator-framework/operator-lib v0.11.0
 	github.com/pkg/errors v0.9.1
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.17.0
 	k8s.io/api v0.27.5
 	k8s.io/apimachinery v0.27.5
@@ -74,4 +74,9 @@ require (
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
+)
+
+replace (
+	k8s.io/client-go => ./custom/client-go
+	sigs.k8s.io/controller-runtime => ./custom/controller-runtime
 )
