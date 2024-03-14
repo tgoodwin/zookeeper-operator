@@ -17,6 +17,9 @@ COPY cmd ./cmd
 COPY go.mod go.mod
 COPY go.sum go.sum
 
+# custom tim stuff
+COPY custom/ custom/
+
 # Download all dependencies.
 RUN go mod download
 
