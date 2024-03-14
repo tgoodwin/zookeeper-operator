@@ -23,6 +23,11 @@ GIT_SHA=$(shell git rev-parse --short HEAD)
 TEST_IMAGE=$(TEST_REPO)-testimages:$(VERSION)
 DOCKER_TEST_PASS=testzkop@123
 DOCKER_TEST_USER=testzkop
+
+# sleeveless stuff
+SLEEVELESS_REPO=tlg2132/$(PROJECT_NAME)
+
+
 .PHONY: all build check clean test
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -182,6 +187,11 @@ push: build-image build-zk-image login
 	docker push $(ALTREPO):latest
 	docker push $(APP_ALTREPO):$(VERSION)
 	docker push $(APP_ALTREPO):latest
+
+sleeveless: build-image
+	docker tag $(REPO):$(VERSION) $(SLEEVELESS_REPO):sleeveless
+	docker push $(SLEEVELESS_REPO):sleeveless
+
 
 clean:
 	rm -f bin/$(PROJECT_NAME)
