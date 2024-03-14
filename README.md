@@ -2,6 +2,9 @@
 [![Build Status](https://travis-ci.org/pravega/zookeeper-operator.svg?branch=master)](https://travis-ci.org/pravega/zookeeper-operator)
 ### Project status: alpha
 
+## SLEEVELESS research
+run `make sleeveless` to build and push an instrumented version of this cluster. Change your docker username in the Makefile
+
 The project is currently alpha. While no breaking API changes are currently planned, we reserve the right to address bugs and change the API before the project is declared stable.
 
 ## Table of Contents
